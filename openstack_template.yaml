@@ -1,0 +1,102 @@
+heat_template_version: 2021-04-16
+
+description: OpenStack Template for Project Portfolio Production
+
+parameters:
+  
+  external_net_name:
+    type: string
+    description: External Network Name
+    default: ntnu-internal
+
+resources:
+
+  Network_1:
+    type: OS::Neutron::Net
+    properties:
+      name: Network_1
+  
+  Subnet_1:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: Network_1 }
+      cidr: 192.168.1.0/24
+      ip_version: 4
+      gateway_ip: 192.168.1.1
+      name: "Subnet_1"
+    depends_on: Network_1
+  
+  Router_1:
+    type: OS::Neutron::Router
+    properties:
+      name: Router_1
+      external_gateway_info: { network: { get_param: external_net_name } }
+  
+  Router_1_Interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: Router_1 }
+      subnet: { get_resource: Subnet_1 }
+    depends_on: [ Router_1, Subnet_1 ]
+
+  SecGroup_1:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: SecGroup_1
+      rules:
+        - protocol: tcp
+          direction: ingress
+          ethertype: IPv4
+          port_range_min: 22
+          port_range_max: 22
+        - protocol: tcp
+          direction: ingress
+          ethertype: IPv4
+          port_range_min: 80
+          port_range_max: 80
+        - protocol: tcp
+          direction: ingress
+          ethertype: IPv4
+          port_range_min: 3389
+          port_range_max: 3389
+
+  TestServer_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: Network_1 }
+      security_groups:
+        - default
+        - { get_resource: SecGroup_1 }
+      fixed_ips:
+        - ip_address: 192.168.1.29
+    depends_on: [ Network_1, SecGroup_1 ]
+  
+  TestServer_floating_ip:
+    type: OS::Neutron::FloatingIP
+    description: Floating IP for TestServer
+    properties:
+      floating_network:
+        { get_param: external_net_name }
+  
+  TestServer_floating_ip_associaton:
+    type: OS::Neutron::FloatingIPAssociation
+    properties:
+      floatingip_id: { get_resource: TestServer_floating_ip }
+      port_id: { get_resource: TestServer_port }
+    depends_on: [ TestServer_floating_ip, TestServer_port ]
+  
+  TestServer:
+    type: OS::Nova::Server
+    properties:
+      image: 08525efe-76a1-4461-bf55-b765190d7441
+      flavor: gx3.1c2r
+      name: TestServer
+      networks:
+        - port: { get_resource: TestServer_port }
+      key_name: keyfour
+    depends_on: TestServer_port
+
+outputs: 
+  ubuntu_instance_ip:
+    description: IP address of the ubuntu instance
+    value: { get_attr: [TestServer, first_address] }
