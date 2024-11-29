@@ -1,0 +1,15 @@
+Requirements:
+    Terraform CLI
+        -Description: Terraform CLI installation required to run Terraform commands.
+    AWS CLI
+        -Description: AWS CLI installed to provision Terraform CLI with AWS credentials.
+        -Configured with an IAM profile with developer access to an AWS Cloud.
+
+Important info about first time setup:
+
+1. Comment out backend declaration in main.tf the first time the template is applied.
+    -In order to use the S3 bucket + DynamoDB table for version-controlling the Terraform Template
+    it must first be created by the template. Including backend on the first application of the template
+    throws an error message.
+2. A webapp task is created for the cluster in order to initialize the service, but there are no images in the
+    ECR repo when initialized. Use the CD workflow on GitHub to push the image after applying this template.

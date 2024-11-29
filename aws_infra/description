@@ -1,0 +1,13 @@
+Requirements:
+    Terraform CLI
+        -Description: Terraform CLI installation required to run Terraform commands.
+    AWS CLI
+        -Description: AWS CLI installed to provision Terraform CLI with AWS credentials.
+        -Configured with an IAM profile with developer access to an AWS Cloud.
+
+
+STEP 1
+Description:
+
+Create an S3 Bucket for the backend to store data about the terraform state.
+Create a DynamodDB table for the terraform locks
