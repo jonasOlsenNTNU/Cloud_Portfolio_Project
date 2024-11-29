@@ -15,11 +15,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Set current time as env variable
+      run: echo "NOW=${{ github.event.repository.updated_at}} >> $GITHUB_ENV
     - name: Login to Docker Hub
       id: login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USER }}/webapp:test
+      run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USER }}/webapp:$NOW
     - name: Push the Docker image
       id: push
-      run: docker push ${{ secrets.DOCKER_USER }}/webapp:test
+      run: docker push ${{ secrets.DOCKER_USER }}/webapp:$NOW
