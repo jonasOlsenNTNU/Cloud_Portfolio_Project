@@ -29,7 +29,7 @@ name: Deploy to Amazon ECS
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ['Node.js CI']
+    workflows: ['Node.js Test']
     types: [completed]
 
 env:
@@ -50,7 +50,7 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: production
+    environment: Project
 
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
