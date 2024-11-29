@@ -27,14 +27,16 @@
 name: Deploy to Amazon ECS
 
 on:
-  push:
-    branches: [ "main" ]
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Node.js CI']
+    types: [completed]
 
 env:
-  AWS_REGION: ${{ variables.AWS_REGION }}                   # set this to your preferred AWS region, e.g. us-west-1
-  ECR_REPOSITORY: ${{ variables.ECR_REPOSITORY }}           # set this to your Amazon ECR repository name
-  ECS_SERVICE: ${{ variables.ECS_SERVICE }}                 # set this to your Amazon ECS service name
-  ECS_CLUSTER: ${{ variables.ECS_CLUSTER }}                 # set this to your Amazon ECS cluster name
+  AWS_REGION: "eu-north-1"                   # set this to your preferred AWS region, e.g. us-west-1
+  ECR_REPOSITORY: "portfolio-ecr-repo"           # set this to your Amazon ECR repository name
+  ECS_SERVICE: "portfolio-service"                 # set this to your Amazon ECS service name
+  ECS_CLUSTER: "portfolio-cluster"                 # set this to your Amazon ECS cluster name
   ECS_TASK_DEFINITION: ${{ github.workspace }}/webapp_task_definition.json # set this to the path to your Amazon ECS task definition
                                                # file, e.g. .aws/task-definition.json
   CONTAINER_NAME: "webapp-task"           # set this to the name of the container in the
@@ -48,6 +50,8 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     environment: production
+
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - name: Checkout
