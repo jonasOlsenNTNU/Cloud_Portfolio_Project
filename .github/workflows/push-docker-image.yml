@@ -24,4 +24,4 @@ jobs:
       run: docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USER }}/webapp:${{ env.NOW }}
     - name: Push the Docker image
       id: push
-      run: docker push ${{ secrets.DOCKER_USER }}/webapp:$NOW
+      run: docker push ${{ secrets.DOCKER_USER }}/webapp:${{ env.NOW }}
